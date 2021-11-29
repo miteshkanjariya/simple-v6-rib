@@ -1,0 +1,64 @@
+This repo has a simple and efficient implementation for storing and managing
+ipv6 address on a router.
+
+Bitwise trie implementation is abstracted out in trie.cpp and trie.h and
+can be used to store any network address or variable length key/len entries.
+The implementation provides following APIs:
+1. trie_new: API to create a new trie, this runs in O(1) time.
+
+2. trie_insert: API to insert a variable length key/len in the TRIE, this API
+walks through the TRIE nodes and finds the appropiate node to store the data.
+since the TRIE is implemented as a bitwise trie, this API will run in
+O(key-length) time.
+
+Example insertion of a key which is of length 4 and has the '0011' as the binary
+format: (* next to the key denotes that )
+
+          0
+        /
+      00
+        \
+        001
+            \
+             0011*
+
+3. trie_search: API to search a key/len from the TRIE. This API will walk the
+nodes of the TRIE and return if a node with given is found or travesal finishes
+looking at all the keys. This API runs in O(key-len) time as it follows one of
+the branch of the bitwise trie until it reaches the trie or there are no more
+keys.
+
+Example searh of a key '0011' which is of length 4 and has the following contents in
+the trie.
+          0
+        /
+      00
+        \
+         001
+        /   \
+     0000*  0011*
+
+It first looks at the root node, since the first bit is 0, it takes the left
+branch, looks at the seconds bit which is 0 as well, so it taked the left branch
+and so on, until it reaches the node with 0011.
+
+
+4. trie_walk: API to walks and calls the user provided walk_fn for all the keys
+stored in the TRIE. It uses the post-order traversal method to return the
+keys with more specific values first, followed by less specific value.
+This API runs in O(num-keys) time as it is walking all the key/value pairs stored in the
+trie.
+
+4. trie_subtree_walk: API to walk all the keys stored in the trie which are
+greater than or equal to the given key. It uses the post-order traversal
+method to return the keys with more specific values first,
+followed by less specific value.
+This API runs in O(num-keys) time as it is walking all the key/value pairs stored in the
+trie.
+
+The program is extended to use the TRIE APIs in ipv6_main.cpp to create an efficient
+in-memory database of all the ipv6 addresses given in the input file.
+Internally, it takes the input of all ipv6 address from an input file.
+It then parses the file and inserts the route one by one, only routes with
+higher preference are stored. It then walks and displays the contents of the
+current ipv6-rib, followed by an example of a sub-tree walk.
